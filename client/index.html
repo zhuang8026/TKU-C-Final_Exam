@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>停車場管理系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>停車場管理系統</h1>
+
+  <div class="container">
+
+    <!-- 左側：停車格地圖 -->
+    <div class="left">
+      <h2>停車格地圖</h2>
+      <div id="grid" class="grid"></div>
+      <p id="stats" class="stats"></p>
+      <button onclick="fetchStatus()">重新整理</button>
+    </div>
+
+    <!-- 右側：操作面板 -->
+    <div class="right">
+
+      <div class="panel">
+        <h2>入場</h2>
+        <input type="text" id="park-plate" placeholder="輸入車牌">
+        <button onclick="parkVehicle()">入場</button>
+      </div>
+
+      <div class="panel">
+        <h2>出場</h2>
+        <input type="text" id="exit-plate" placeholder="輸入車牌">
+        <button onclick="exitVehicle()">出場</button>
+      </div>
+
+      <div class="panel">
+        <h2>歷史查詢</h2>
+        <input type="text" id="history-plate" placeholder="輸入車牌">
+        <button onclick="queryHistory()">查詢</button>
+      </div>
+
+      <!-- 結果顯示區 -->
+      <div id="result" class="result"></div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
