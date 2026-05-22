@@ -4,13 +4,13 @@
 #include <time.h>
 
 /* 停車場固定大小：3 列 × 3 欄，共 9 格 */
-#define ROWS      3     /* 列 */
-#define COLS      3     /* 欄 */
+#define ROWS      3
+#define COLS      3
 #define PLATE_LEN 20   /* 車牌字串最大長度（含 '\0'） */
 
 /* ────────────────────────────────────────
-Structs
-──────────────────────────────────────── */
+   Structs
+   ──────────────────────────────────────── */
 
 /* 一台車的資訊：車牌、入場時間、停在哪一格 */
 typedef struct {
@@ -69,13 +69,32 @@ typedef struct {
 } LotState;
 
 /* ────────────────────────────────────────
-Function declarations
-──────────────────────────────────────── */
+   Function declarations
+   ──────────────────────────────────────── */
 
 /* 建立並初始化停車場，動態配置所有資料結構，回傳根節點指標 */
 LotState *init_lot(void);
 
 /* 釋放停車場所有動態記憶體（grid、stack、queue、history） */
 void free_lot(LotState *lot);
+
+/* ── Stack ── */
+int      stack_is_empty(Stack *s);
+int      stack_is_full(Stack *s);
+int      stack_push(Stack *s, Vehicle v);  /* 成功回傳 0，已滿回傳 -1 */
+Vehicle  stack_pop(Stack *s);              /* 呼叫前須確認 stack 非空 */
+Vehicle *stack_peek(Stack *s);             /* 回傳頂部指標，空則回傳 NULL */
+
+/* ── Queue ── */
+int     queue_is_empty(Queue *q);
+void    queue_enqueue(Queue *q, Vehicle v);
+Vehicle queue_dequeue(Queue *q);           /* 呼叫前須確認 queue 非空 */
+
+/* ── Grid ── */
+int  find_empty_spot(LotState *lot, int *row, int *col); /* 找到回傳 1，滿回傳 0 */
+void set_spot(LotState *lot, int row, int col, int occupied, const char *plate);
+
+/* ── Linked List (History) ── */
+void history_append(LotState *lot, const char *plate, time_t entry_time, time_t exit_time);
 
 #endif
