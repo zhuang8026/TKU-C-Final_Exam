@@ -2,8 +2,10 @@ import subprocess
 import json
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # 允許前端跨來源請求
 
 # C 執行檔與狀態檔的路徑，以 app.py 位置為基準往上找 core/
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +21,10 @@ def call_parking(*args):
         text=True,
         cwd=CORE_DIR
     )
-    return json.loads(result.stdout)
+    try:
+        return json.loads(result.stdout)
+    except (json.JSONDecodeError, ValueError):
+        return {'error': 'core error', 'detail': result.stderr.strip()}
 
 # ── Routes ──
 
@@ -32,7 +37,8 @@ def status():
 def park():
     """入場：body { "plate": "ABC-1234" }
     回傳 parked（停車成功）或 queued（候位）"""
-    plate = request.json.get('plate', '').strip()
+    data  = request.get_json(silent=True) or {}
+    plate = data.get('plate', '').strip()
     if not plate:
         return jsonify({'error': 'missing plate'}), 400
     return jsonify(call_parking('park', plate))
@@ -41,7 +47,8 @@ def park():
 def exit_vehicle():
     """出場：body { "plate": "ABC-1234" }
     回傳 exited、not found 或 blocked（含阻擋車牌清單）"""
-    plate = request.json.get('plate', '').strip()
+    data  = request.get_json(silent=True) or {}
+    plate = data.get('plate', '').strip()
     if not plate:
         return jsonify({'error': 'missing plate'}), 400
     return jsonify(call_parking('exit', plate))
