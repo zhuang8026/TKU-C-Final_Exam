@@ -97,4 +97,12 @@ void set_spot(LotState *lot, int row, int col, int occupied, const char *plate);
 /* ── Linked List (History) ── */
 void history_append(LotState *lot, const char *plate, time_t entry_time, time_t exit_time);
 
+/* ── Business Logic ── */
+int      vehicle_in_lot(LotState *lot, const char *plate);        /* 車輛是否在場內 */
+int      can_exit(LotState *lot, const char *plate);              /* 是否在 stack 頂部可出場 */
+int      park_vehicle(LotState *lot, const char *plate);          /* 入場；滿則加入候位，回傳 -1 */
+int      exit_vehicle(LotState *lot, const char *plate);          /* 出場；不在頂部回傳 -2 */
+Record **search_history(LotState *lot, const char *plate, int *count); /* 查詢歷史，回傳 dynamic array */
+void     free_search_results(Record **results);                   /* 釋放查詢結果陣列 */
+
 #endif
