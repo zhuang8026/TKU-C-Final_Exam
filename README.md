@@ -1,6 +1,7 @@
 # 停車場管理系統 — Parking Lot Management System
 
-淡江大學 C 語言期末專案。以 C 語言實作停車場核心邏輯，透過 Python Flask 提供 HTTP API，前端以純 HTML/CSS/JavaScript 呈現即時畫面。
+淡江大學 C 語言期末專案
+以 C 語言實作停車場核心邏輯，透過 Python Flask 提供 HTTP API，前端以純 HTML/CSS/JavaScript 呈現即時畫面。
 
 ---
 
@@ -77,7 +78,7 @@ TKU-C-Final_Exam_v2/
 │   ├── app.js
 │   └── README.md
 ├── .gitignore
-└── README.md               # 本文件
+└── README.md               # 總文件說明
 ```
 
 ---
