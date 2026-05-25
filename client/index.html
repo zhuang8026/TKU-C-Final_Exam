@@ -15,7 +15,11 @@
     <!-- 左側：停車格地圖 -->
     <div class="left">
       <h2>停車格地圖</h2>
-      <div id="grid" class="grid"></div>
+      <div class="lot-wrapper">
+        <div class="lot-sign entrance">&#x25BC; 入口</div>
+        <div id="grid"></div>
+        <div class="lot-sign exit">出口 &#x25BC;</div>
+      </div>
       <p id="stats" class="stats"></p>
       <button onclick="fetchStatus()">重新整理</button>
     </div>

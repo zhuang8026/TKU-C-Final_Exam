@@ -12,13 +12,55 @@ function renderGrid(data) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
-  data.grid.forEach(row => {
-    row.forEach(spot => {
+  const rowLabels = ['A', 'B', 'C'];
+
+  data.grid.forEach((row, rowIdx) => {
+    // 行車道（第一排前不加）
+    if (rowIdx > 0) {
+      const lane = document.createElement('div');
+      lane.className = 'lane-strip';
+      const center = document.createElement('div');
+      center.className = 'lane-center';
+      lane.appendChild(center);
+      grid.appendChild(lane);
+    }
+
+    const rowGroup = document.createElement('div');
+    rowGroup.className = 'row-group';
+
+    // 排標籤（A / B / C）
+    const label = document.createElement('div');
+    label.className = 'row-label';
+    label.textContent = rowLabels[rowIdx] ?? (rowIdx + 1);
+    rowGroup.appendChild(label);
+
+    const spotsRow = document.createElement('div');
+    spotsRow.className = 'spots-row';
+
+    row.forEach((spot, colIdx) => {
       const div = document.createElement('div');
       div.className = 'spot ' + (spot.occupied ? 'occupied' : 'empty');
-      div.textContent = spot.occupied ? spot.plate : '空位';
-      grid.appendChild(div);
+
+      if (spot.occupied) {
+        const car = document.createElement('div');
+        car.className = 'car-top';
+        const badge = document.createElement('span');
+        badge.className = 'plate-badge';
+        badge.textContent = spot.plate;
+        div.appendChild(car);
+        div.appendChild(badge);
+      } else {
+        const num = document.createElement('span');
+        num.className = 'spot-num';
+        num.textContent = `${rowLabels[rowIdx] ?? (rowIdx + 1)}${colIdx + 1}`;
+        div.appendChild(num);
+      }
+
+      spotsRow.appendChild(div);
     });
+
+    rowGroup.appendChild(spotsRow);
+    grid.appendChild(rowGroup);
   });
 
   document.getElementById('stats').textContent =
