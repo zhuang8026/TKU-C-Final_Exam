@@ -1,0 +1,220 @@
+你是一位簡報設計專家，請根據以下專案內容，生成一份完整的「停車場管理系統」期末專案簡報。
+
+## 簡報要求
+
+- 對象：大學 C 語言課程教授
+- 風格：技術性、條理清晰、重點突出
+- 格式：每頁用 === 頁碼. 標題 === 分隔，內容用條列或表格呈現
+- 語言：繁體中文
+- 重點：C 語言實作為主，Flask 與前端簡略帶過
+- 總頁數：10–12 頁
+
+---
+
+## 專案基本資訊
+
+- 專案名稱：停車場管理系統（Parking Lot Management System）
+- 學校：淡江大學
+- 課程：C 語言程式設計期末專案
+- 架構：C 語言核心 → Python Flask API → 瀏覽器前端
+
+---
+
+## 簡報大綱（依序生成以下各頁）
+
+### 第 1 頁：封面
+- 專案名稱、學校、課程名稱
+
+### 第 2 頁：專案簡介與功能
+功能清單：
+- 停車格地圖：3×3 格，即時顯示佔用狀態與車牌
+- 入場：輸入車牌，有空位直接停入；車位滿則加入候位佇列
+- 出場：僅限最後入場的車輛可直接離開（LIFO 單排車道）；若被擋住則顯示需先移出的車牌清單
+- 候位自動入場：車輛出場後，候位佇列第一台車自動填入空格
+- 歷史查詢：輸入車牌，顯示所有入場與出場時間紀錄
+
+### 第 3 頁：系統架構
+三層架構說明：
+```
+瀏覽器（HTML/CSS/JS）
+    │ HTTP fetch
+    ▼
+Python Flask（server/app.py）
+    │ subprocess.run()
+    ▼
+C 執行檔（core/parking）← 主角，所有資料結構與邏輯
+    │ fread / fwrite
+    ▼
+lot_state.bin（二進位狀態檔）
+```
+強調：Flask 只是中介，C 才是真正執行運算的核心。
+
+### 第 4 頁：C 核心檔案分工
+```
+core/
+├── parking.h          # 所有 struct 定義 + 函式宣告
+├── parking.c          # 記憶體生命週期：init_lot() / free_lot()
+├── data_structures.c  # 基礎操作：stack / queue / grid / linked list
+├── logic.c            # 業務邏輯：入場 / 出場 / 歷史查詢
+└── main.c             # CLI 入口、JSON 輸出、讀寫狀態檔
+```
+設計原則：由下往上，每層只依賴下面的層，高內聚、低耦合。
+
+### 第 5 頁：九項 C 語言需求對應表
+用表格呈現：
+
+| # | 需求 | 落地方式 | 關鍵程式碼位置 |
+|---|------|---------|--------------|
+| 1 | 函式拆分 | 四個 .c 各司其職，main() 只做流程控制 | 全部 .c 檔 |
+| 2 | struct | Vehicle、ParkingSpot、Stack、Queue、Record、LotState | parking.h |
+| 3 | malloc/free | 每個節點入場時 malloc，出場時 free | parking.c、data_structures.c |
+| 4 | pointer | 雙層指標、傳址呼叫、*next 串接、-> 運算子 | 全部 .c 檔 |
+| 5 | 2D array | ParkingSpot **grid，雙層指標動態配置 3×3 | parking.c |
+| 6 | stack | linked list 實作 LIFO，對應單排車道 | data_structures.c |
+| 7 | queue | linked list 實作 FIFO，對應候位佇列 | data_structures.c |
+| 8 | linked list | Record *history_head，每次出場尾端新增一筆 | data_structures.c |
+| 9 | dynamic array | search_history() 用 realloc 擴充查詢結果緩衝 | logic.c |
+
+### 第 6 頁：Pointer 四大用法
+詳細說明以下四個場景，每個附程式碼片段：
+
+① 雙層指標（**）動態配置 2D array
+```c
+lot->grid = malloc(ROWS * sizeof(ParkingSpot *));
+for (int i = 0; i < ROWS; i++)
+    lot->grid[i] = malloc(COLS * sizeof(ParkingSpot));
+```
+記憶體示意：grid → [列0指標] → [spot(0,0)|spot(0,1)|spot(0,2)]
+
+② 傳址呼叫（Pass by Pointer）
+```c
+int park_vehicle(LotState *lot, const char *plate)
+// 傳位址，直接修改外部狀態，不複製整個結構
+```
+find_empty_spot() 同時回傳兩個值：
+```c
+int find_empty_spot(LotState *lot, int *row, int *col);
+```
+
+③ Linked list *next 串接
+```c
+struct StackNode { Vehicle data; struct StackNode *next; };
+// 走訪：curr = curr->next
+```
+
+④ -> 運算子
+```c
+lot->lane->size    // 停車數
+curr->data.plate   // 節點內車牌
+```
+
+### 第 7 頁：lot_state.bin 持久化設計
+問題說明：
+- Flask 每次呼叫 subprocess.run() 都是獨立新行程
+- C 行程結束後記憶體全部消失，下次呼叫停車場會是空的
+
+解法：
+```c
+int main(...) {
+    LotState *lot = load_state();   // 第一行：讀取上次狀態
+    // ... 執行指令 ...
+    save_state(lot);                // 倒數第二行：寫回狀態
+    free_lot(lot);                  // 最後：釋放記憶體
+}
+```
+
+序列化順序：Grid → Stack → Queue → History
+- Grid：固定大小，直接 fwrite 每一列
+- Stack/Queue：linked list 先展開成暫存陣列再寫入
+- History：去除 *next 指標，只寫資料欄位（RecordSave struct）
+
+讀取時依同樣順序，逐步重建所有資料結構。
+
+### 第 8 頁：資料結構應用場景與設計理由
+說明每個資料結構的選擇理由：
+
+Stack → 單排車道（LIFO）
+- 單一出入口，後進先出天然對應
+- 被擋住時列出阻擋車牌清單
+
+Queue → 候位系統（FIFO）
+- 公平排隊，先來先入場
+- 出場後自動觸發 dequeue，下一台自動入場
+
+Linked List → 歷史紀錄
+- 筆數無上限，持續只增不刪
+- 每次出場 malloc 新節點接在尾端
+
+Dynamic Array → 查詢結果緩衝
+- 結果數量事先未知，用 realloc 動態擴充
+- 初始容量 4，滿了就 ×2
+- 存指標不複製資料，查完只 free 指標陣列
+
+2D Array → 停車格地圖
+- 有明確列欄座標，grid[row][col] 直覺對應畫面
+- Vehicle 記錄 row/col，出場時精確定位清空格位
+
+### 第 9 頁：資料結構比較表
+| 資料結構 | 存取順序 | 新增 | 刪除 | 應用場景 |
+|---------|---------|------|------|---------|
+| Stack | LIFO | 頂部 O(1) | 頂部 O(1) | 單排車道進出 |
+| Queue | FIFO | 尾端 O(1) | 前端 O(1) | 候位排隊 |
+| Linked List | 循序 | 尾端 O(n) | 不刪除 | 歷史紀錄 |
+| Dynamic Array | 索引 | 尾端 O(1)* | 不刪除 | 查詢結果暫存 |
+| 2D Array | 座標 | — | — | 停車格地圖 |
+*容量不足時 realloc 為 O(n)
+
+### 第 10 頁：系統資料流
+說明三個主要操作的完整流程：
+
+入場流程：
+```
+使用者輸入車牌
+    → stack 未滿？
+        YES → find_empty_spot() → set_spot() → stack_push() → 回傳 parked
+        NO  → queue_enqueue() → 回傳 queued
+```
+
+出場流程：
+```
+使用者輸入車牌
+    → vehicle_in_lot() 確認在場內
+    → can_exit() 確認在 stack 頂部
+        YES → stack_pop() → set_spot(清空) → history_append()
+              → queue 有車？ → queue_dequeue() → 自動入場
+        NO  → print_blocked() 列出阻擋清單
+```
+
+歷史查詢流程：
+```
+使用者輸入車牌
+    → search_history() 走訪 linked list
+    → 符合結果存入 dynamic array（realloc 擴充）
+    → 回傳 JSON → free_search_results()
+```
+
+### 第 11 頁：Demo 畫面說明（可選）
+說明前端三個操作面板對應的 API：
+- 入場 → POST /park {"plate": "ABC-123"}
+- 出場 → POST /exit {"plate": "ABC-123"}
+- 歷史查詢 → GET /history/ABC-123
+
+### 第 12 頁：總結
+- 九項需求全部自然落地，沒有為了湊需求而硬塞
+- 最有設計感的部分：lot_state.bin 解決 subprocess 跨行程狀態問題
+- 架構清晰：C 負責所有運算，Flask 只是傳話的中間人
+- 一句話總結：「用停車場的現實邏輯，讓每個 C 語言需求都有意義地存在。」
+
+---
+
+## 輸出格式說明
+
+每頁格式如下：
+
+=== 頁碼. 頁面標題 ===
+
+[內容，條列 / 表格 / 程式碼區塊]
+
+---
+
+請開始生成完整簡報，不要省略任何一頁。

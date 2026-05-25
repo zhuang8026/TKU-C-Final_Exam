@@ -1,4 +1,4 @@
-const API = 'http://127.0.0.1:5000';
+const API = 'http://127.0.0.1:5001';
 
 /* ── 停車格地圖 ── */
 
@@ -139,7 +139,6 @@ async function queryHistory() {
 }
 
 /* ── 結果顯示輔助 ── */
-
 function showResult(msg, type) {
   const el = document.getElementById('result');
   el.textContent  = msg;
