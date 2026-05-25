@@ -120,6 +120,7 @@ h2 {
   border-left: 2px solid rgba(255,255,255,0.55);
   border-right: 2px solid rgba(255,255,255,0.55);
   position: relative;
+  overflow: hidden;
 }
 
 .spot.empty {
@@ -227,3 +228,37 @@ button:hover {
 .result.success { border-left: 4px solid #43a047; }
 .result.warning { border-left: 4px solid #fb8c00; }
 .result.error   { border-left: 4px solid #e53935; }
+
+/* ── 入場動畫 ── */
+@keyframes carEnterSlide {
+  from { transform: translateY(-40px); }
+  to   { transform: translateY(0); }
+}
+@keyframes carEnterFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.car-top.entering {
+  animation:
+    carEnterSlide 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both,
+    carEnterFade  0.35s ease-out both;
+}
+.plate-badge.entering {
+  animation:
+    carEnterSlide 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s both,
+    carEnterFade  0.35s ease-out 0.08s both;
+}
+
+/* ── 出場動畫 ── */
+@keyframes carExit {
+  from { transform: translateY(0);     opacity: 1; }
+  to   { transform: translateY(54px);  opacity: 0; }
+}
+
+.car-top.exiting {
+  animation: carExit 0.4s ease-in both;
+}
+.plate-badge.exiting {
+  animation: carExit 0.4s ease-in both;
+}

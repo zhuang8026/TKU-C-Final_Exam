@@ -80,14 +80,17 @@ async function parkVehicle() {
   });
   const data = await res.json();
 
-  if (data.status === 'parked')
+  if (data.status === 'parked') {
     showResult(`${data.plate} 已停入`, 'success');
-  else if (data.status === 'queued')
+    await fetchStatus();          // 重繪後才能找到新元素
+    animateCarEnter(data.plate);
+  } else if (data.status === 'queued') {
     showResult(`${data.plate} 車位已滿，已加入候位`, 'warning');
-  else
+    fetchStatus();
+  } else {
     showResult(data.error || '未知錯誤', 'error');
-
-  fetchStatus();
+    fetchStatus();
+  }
 }
 
 /* ── 出場 ── */
@@ -103,16 +106,17 @@ async function exitVehicle() {
   });
   const data = await res.json();
 
-  if (data.status === 'exited')
+  if (data.status === 'exited') {
     showResult(`${data.plate} 已出場`, 'success');
-  else if (data.error === 'blocked')
+    await animateCarExit(data.plate);  // 動畫結束後再重繪
+    fetchStatus();
+  } else if (data.error === 'blocked') {
     showResult(`${data.plate} 無法出場，請先移出：\n${data.blocking.join('、')}`, 'warning');
-  else if (data.error === 'not found')
+  } else if (data.error === 'not found') {
     showResult(`${data.plate} 不在場內`, 'error');
-  else
+  } else {
     showResult(data.error || '未知錯誤', 'error');
-
-  fetchStatus();
+  }
 }
 
 /* ── 歷史查詢 ── */
@@ -136,6 +140,44 @@ async function queryHistory() {
   });
 
   showResult(`${plate} 歷史紀錄：\n\n${lines.join('\n\n')}`, 'success');
+}
+
+/* ── 動畫輔助 ── */
+
+function animateCarEnter(plate) {
+  for (const badge of document.querySelectorAll('.plate-badge')) {
+    if (badge.textContent === plate) {
+      const spot   = badge.closest('.spot');
+      const carTop = spot?.querySelector('.car-top');
+      if (carTop) {
+        // 強制同步 reflow：瀏覽器計算好初始 layout 後再加 class，
+        // 避免先 paint 正常狀態、再重播動畫造成閃爍
+        void carTop.offsetWidth;
+        carTop.classList.add('entering');
+        badge.classList.add('entering');
+      }
+      break;
+    }
+  }
+}
+
+function animateCarExit(plate) {
+  return new Promise(resolve => {
+    for (const badge of document.querySelectorAll('.plate-badge')) {
+      if (badge.textContent === plate) {
+        const spot   = badge.closest('.spot');
+        const carTop = spot?.querySelector('.car-top');
+        if (carTop) {
+          carTop.classList.add('exiting');
+          badge.classList.add('exiting');
+          carTop.addEventListener('animationend', resolve, { once: true });
+          return;
+        }
+        break;
+      }
+    }
+    resolve();  // 找不到元素時直接繼續
+  });
 }
 
 /* ── 結果顯示輔助 ── */
