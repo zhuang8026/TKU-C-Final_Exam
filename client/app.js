@@ -1,4 +1,5 @@
-const API = 'http://127.0.0.1:5001';
+// const API = 'http://127.0.0.1:5001';
+const API = 'https://parking-server-fnf3a8g8c3csgaeu.eastasia-01.azurewebsites.net';
 
 /* ── 停車格地圖 ── */
 
