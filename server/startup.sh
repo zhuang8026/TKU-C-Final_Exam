@@ -1,2 +1,4 @@
 #!/bin/bash
-gunicorn --bind=0.0.0.0:8000 --chdir /home/site/wwwroot/server app:app
+chmod +x /home/site/wwwroot/core/parking
+cd /home/site/wwwroot/server
+exec gunicorn --bind=0.0.0.0:8000 app:app
