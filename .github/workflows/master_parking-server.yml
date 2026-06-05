@@ -73,10 +73,14 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4F275BC111B0423592383B8704BE5956 }}
 
       - name: Set startup command
-        uses: azure/appservice-settings@v1
+        uses: azure/cli@v2
         with:
-          app-name: 'parking-server'
-          general-settings-json: '{"linuxFxVersion": "PYTHON|3.11", "appCommandLine": "bash /home/site/wwwroot/server/startup.sh"}'
+          inlineScript: |
+            az webapp config set \
+              --resource-group tku \
+              --name parking-server \
+              --linux-fx-version "PYTHON|3.11" \
+              --startup-file "bash /home/site/wwwroot/server/startup.sh"
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
