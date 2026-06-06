@@ -148,4 +148,3 @@ Flask 啟動後監聽於 `http://127.0.0.1:5000`
 | 19 | 請進行全面驗收：(1) C 編譯無 warning (2) 所有 API 路由回傳格式正確 (3) 前端 fetch 路徑與 CORS 設定無誤 (4) 狀態持久化跨次呼叫仍正確 (5) 候位佇列與阻擋邏輯符合 LIFO 規則 (6) 歷史查詢支援多筆紀錄 (7) 無記憶體洩漏 | 全面檢查編譯、功能測試、API 路由、前端邏輯 |
 | 20 | 請在專案根目錄建立 README.md，內容須包含：專案簡介、功能介紹表格、技術棧表格、C 語言 9 項需求對應表、系統架構 ASCII 圖、目錄結構、四階段啟動步驟（編譯 / 安裝套件 / 啟動 Flask / 開啟前端）、Claude AI Prompt 使用紀錄 | 建立本文件，對整個專案進行完整說明 |
 | 21 | 請在 README.md 的專案簡介下方新增 Demo 網址區塊，使用 Markdown 連結格式：[https://brave-field-08b4ef100.7.azurestaticapps.net/](https://brave-field-08b4ef100.7.azurestaticapps.net/)，方便讀者直接點擊體驗 | 新增 Azure Static Web Apps 部署的 Demo 連結 |
-| 22 | 請分析並潤稿「Claude AI Prompt 使用紀錄」表格中所有 Prompt 內容，將原本簡短的口語化指令改寫為可讓 AI 直接理解並執行的明確指令，每條應包含：具體的動作（建立/實作/驗證）、目標檔案、實作細節、預期輸出 | 重新潤稿所有 Prompt，提升可重現性與可讀性 |
