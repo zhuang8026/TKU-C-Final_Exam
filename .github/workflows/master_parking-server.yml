@@ -80,7 +80,7 @@ jobs:
               --resource-group tku \
               --name parking-server \
               --linux-fx-version "PYTHON|3.11" \
-              --startup-file "bash /home/site/wwwroot/server/startup.sh"
+              --startup-file "bash server/startup.sh"
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
